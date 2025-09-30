@@ -9,3 +9,27 @@
     # Inbyggda bibliotek (logging, json, datetime, tkinter)
     # Lambda-funktioner för sortering
     # Versionshantering med Git & GitHub
+
+def main_menu():
+
+while True:
+    print("\n--- Main Menu ---")
+    print("1. Start Monitoring")
+    print("2. List Active Monitoring")
+    print("3. Create Alarm")
+    print("4. View Alarms")
+    print("5. Enter Monitoring Mode")
+    print("6. Exit")
+
+    choice = input("Select an option (1-6): ")
+
+    if choice == '1':
+        print("You selected: Start Monitoring (Functionality to be added later)")
+        pass
+    elif choice == '2':
+        print("You selected_ List Active Monitoring (Functionality to be added later)")
+        pass
+    elif choice == '3':
+        print("You selected: Create Alarm (Functionality to be added later)")
+        pass
+    
