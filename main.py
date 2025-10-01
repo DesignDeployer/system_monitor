@@ -1,6 +1,8 @@
 # ---------- Systemutveckling i Python ----------
 # This is the main file for our monitoring application:
 
+from system_info import get_cpu_usage, get_memory_usage, get_disk_usage
+
 def main_menu():
 
     while True:
@@ -17,9 +19,21 @@ def main_menu():
         if choice == '1':
             print("You selected: Start Monitoring (Functionality to be added later)")
             pass
+
         elif choice == '2':
-            print("You selected_ List Active Monitoring (Functionality to be added later)")
-            pass
+            print("\n--- Active Monitoring Status ---")
+            
+            cpu_percent = get_cpu_usage()
+            print(f"CPU Usage: {cpu_percent}%")
+            
+            memory_percent, memory_used_gb, memory_total_gb = get_memory_usage()
+            print(f"Memory Usage: {memory_percent}% ({memory_used_gb} GB out of {memory_total_gb} GB used)")
+            
+            disk_percent, disk_used_gb, disk_total_gb = get_disk_usage()
+            print(f"Disk Usage: {disk_percent}% ({disk_used_gb} GB out of {disk_total_gb} GB used)")
+            
+            input("\nPress Enter to return to the menu...")
+            
         elif choice == '3':
             print("You selected: Create Alarm (Functionality to be added later)")
             pass
