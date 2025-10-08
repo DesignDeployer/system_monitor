@@ -4,6 +4,50 @@
 from system_info import get_cpu_usage, get_memory_usage, get_disk_usage
 from alarm import Alarm
 
+import time # För att kunna pausa programmet (time.sleep)
+import msvcrt # Specifik för Windows, för att kunna läsa tangnettryckningar
+
+def monitoring_mode(alarms_list):
+    print("\n--- Entering Monitoring Mode ---")
+    print("Monitoring is active. Press any key to return to the menu.")
+
+    while True:
+        if msvcrt.kbhit():
+            print("\nKey pressed, exiting monitoring mode...")
+            msvcrt.getch()
+            break
+
+        current_cpu = get_cpu_usage()
+        current_memory_percent, _, _ = get_memory_usage()
+        current_disk_percent, _, _ = get_disk_usage()
+    
+    for alarm in alarms_list:
+        if alarm.alarm_type == "CPU" and current_cpu > alarm.threshold:
+            print(f"\n--- WARNING, ALARM TRIGGERED: CPU USAGE EXCEEDS {alarm.threshold}% ---")
+
+        elif alarm.alarm_type == "Memory" and current_memory_percent > alarm.threshold:
+            print(f"\n--- WARNING, ALARM TRIGGERED: MEMORY USAGE EXCEEDS {alarm.threshold}% ---")
+
+        elif alarm.alarm_type == "Disk" and current_disk_percent > alarm.threshold:
+            print(f"\n--- WARNING, ALARM TRIGGERED: DISK USAGE EXCEEDS {alarm.threshold}% ---")
+
+    print(f"Monitoring... Last check: CPU {current_cpu}%, Memory {current_memory_percent}%, Disk {current_disk_percent}%, Press any key to exit.", end="\r")
+
+    time.sleep(5)
+
+def view_alarms(alarms_list):
+    print("\n--- Configured Alarms ---")
+
+    if not alarms_list:
+        print("No alarms have been configured yet.")
+    else:
+        sorted_alarms = sorted(alarms_list, key=lambda alarm: alarm.alarm_type)
+
+        for index, alarm in enumerate(sorted_alarms, start=1):
+            print(f"{index}, {alarm.alarm_type} alarm {alarm.threshold}%")
+    
+    input("\nPress Enter to return to the menu...")
+
 def create_alarm_menu(alarms_list):
     while True:
         print("\n--- Configure Alarm ---")
@@ -86,11 +130,11 @@ def main_menu():
             create_alarm_menu(alarms)
             
         elif choice == '4':
-            print("You Selected: View Alarms (Functionality to be added later)")
-            pass
+            view_alarms(alarms)
+
         elif choice == '5':
-            print("You Selected: Enter Monitoring Mode (Functionality to be added later)")
-            pass
+            monitoring_mode(alarms)
+            
         elif choice == '6':
             print("Exiting application. Goodbye!")
             break
