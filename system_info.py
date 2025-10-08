@@ -4,10 +4,10 @@
 import psutil
 
 def get_cpu_usage():
+    """
+    cpu_percent är min verktyg som hämtas av psutil och "interval=1" då mätter jag användningen under 1 sekund för att få ett mer stabilt och korrekt värde.
+    """
     return psutil.cpu_percent(interval=1) 
-"""
-cpu_percent är min verktyg som hämtas av psutil och "interval=1" då mätter jag användningen under 1 sekund för att få ett mer stabilt och korrekt värde.
-"""
 
 def get_memory_usage():
     memory_info = psutil.virtual_memory()
