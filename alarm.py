@@ -1,5 +1,5 @@
 # ---------- Systemutveckling i Python ----------
-# This file defines the Alarm Class:
+# This file defines the Alarm Class.
 
 class Alarm:
     """

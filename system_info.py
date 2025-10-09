@@ -1,5 +1,5 @@
 # ---------- Systemutveckling i Python ----------
-# This file contains functions to retrieve system information:
+# This file contains functions to retrieve system information.
 
 import psutil
 
