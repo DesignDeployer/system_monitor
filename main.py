@@ -9,6 +9,48 @@ import logging
 from logger_config import setup_logging
 from file_handler import save_alarms, load_alarms
 
+def delete_alarm_menu(alarms_list):
+    """Handles the alarm deletion process."""
+    logging.info("User_selected_Delete_Alarm")
+
+    if not alarms_list:
+        print("\nThere are no alarms ")
+        input("Press Enter to return tothe menu...")
+        return
+    
+    print("\n--- Select an alarm to delete ---")
+    sorted_alarms = sorted(alarms_list, key=lambda alarm: alarm.alarm_type)
+    for index, alarm in enumerate(sorted_alarms, start=1):
+        print(f"{index}. {alarm.alarm_type} alarm {alarm.threshold}%")
+    print(f"{len(sorted_alarms) + 1}. Cancel")
+
+    while True:
+        choice_input = input("Enter the number of the alarm to delete: ")
+
+        if choice_input.isdigit():
+            choice = int(choice_input)
+            if choice == len(sorted_alarms) + 1:
+                logging.info("User_cancelled_alarm_deletion")
+                return
+            
+            if 1 <= choice <= len(sorted_alarms):
+                index_to_delete = choice - 1
+                alarm_to_delete = sorted_alarms[index_to_delete]
+
+                alarms_list.remove(alarm_to_delete)
+
+                save_alarms(alarms_list)
+
+                print(f"\nSuccess: {alarm_to_delete.alarm_type} alarm at {alarm_to_delete.threshold}% has been deleted.")
+                logging.info(f"Alarm_Deleted_Type_{alarm_to_delete.alarm_type}_Threshold_{alarm_to_delete.threshold}%")
+                input("Press Enter to return to the menu...")
+                return
+            
+            else:
+                print("Error: Invalid number. Please try again.")
+        else:
+            print("Error: Please enter a valid number.")
+
 def monitoring_mode(alarms_list):
     """
     Enters an active monitoring loop that checks stats against alarms.
@@ -93,7 +135,13 @@ def create_alarm_menu(alarms_list):
         print("3. Disk Usage")
         print("4. Back to Main Menu")
         type_choice = input("Select alarm type (1-4): ")
-        alarm_type_map = {"1": "CPU", "2": "Memory", "3": "Disk"}
+        
+        alarm_type_map = {
+            "1": "CPU", 
+            "2": "Memory", 
+            "3": "Disk"
+        }
+
         if type_choice in alarm_type_map:
             alarm_type = alarm_type_map[type_choice]
             logging.info(f"User_is_configuring_{alarm_type}_alarm")
@@ -131,9 +179,10 @@ def main_menu():
         print("3. Create Alarm")
         print("4. View Alarms")
         print("5. Enter Monitoring Mode")
-        print("6. Exit")
+        print("6. Delete Alarm")
+        print("7. Exit")
 
-        choice = input("Select an option (1-6): ")
+        choice = input("Select an option (1-7): ")
 
         if choice == '1':
             monitoring_active = True
@@ -162,6 +211,8 @@ def main_menu():
         elif choice == '5':
             monitoring_mode(alarms)
         elif choice == '6':
+            delete_alarm_menu(alarms)
+        elif choice == '7':
             logging.info("User_selected_Exit. Program_shutting_down.")
             print("Exiting application. Goodbye!")
             break
