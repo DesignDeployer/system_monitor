@@ -9,3 +9,4 @@ class Alarm:
     def __init__(self, alarm_type, threshold):
         self.alarm_type = alarm_type
         self.threshold = threshold
+        self.is_triggered = False
