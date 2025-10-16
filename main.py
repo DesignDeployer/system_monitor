@@ -1,5 +1,6 @@
 # ---------- Systemutveckling i Python ----------
 # This is the main file for our monitoring application.
+# source venv/Scripts/activate - Activate virtual environment (Windows)
 
 from system_info import get_cpu_usage, get_memory_usage, get_disk_usage
 from alarm import Alarm
@@ -9,6 +10,8 @@ import logging
 from logger_config import setup_logging
 from file_handler import save_alarms, load_alarms
 from email_sender import send_email_alert
+import tkinter as tk
+from gui import App
 
 def delete_alarm_menu(alarms_list):
     """Handles the alarm deletion process."""
@@ -188,9 +191,10 @@ def main_menu():
         print("4. View Alarms")
         print("5. Enter Monitoring Mode")
         print("6. Delete Alarm")
-        print("7. Exit")
+        print("7. Start Graphical Interface (GUI)")
+        print("8. Exit")
 
-        choice = input("Select an option (1-7): ")
+        choice = input("Select an option (1-8): ")
 
         if choice == '1':
             monitoring_active = True
@@ -221,8 +225,18 @@ def main_menu():
         elif choice == '6':
             delete_alarm_menu(alarms)
         elif choice == '7':
+            logging.info("User_selected_Start_GUI")
+            print("Starting Graphical Interface...")
+            
+            root = tk.Tk()
+            app = App(root, alarms)
+            root.mainloop()
+            print("Graphical interface closed.")
+            logging.info("GUI_closed_returning_to_main_menu")
+        
+        elif choice == '8':
             logging.info("User_selected_Exit. Program_shutting_down.")
-            print("Exiting application. Goodbye!")
+            print("Exiting the application. Goodbye!")
             break
         else:
             print("Invalid choice. Please try again.")
