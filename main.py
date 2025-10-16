@@ -8,6 +8,7 @@ import msvcrt
 import logging
 from logger_config import setup_logging
 from file_handler import save_alarms, load_alarms
+from email_sender import send_email_alert
 
 def delete_alarm_menu(alarms_list):
     """Handles the alarm deletion process."""
@@ -72,17 +73,24 @@ def monitoring_mode(alarms_list):
         current_disk_percent, _, _ = get_disk_usage()
 
         for alarm in alarms_list:
-            if alarm.alarm_type == "CPU" and current_cpu > alarm.threshold:
-                print(f"\n*** WARNING, ALARM TRIGGERED: CPU USAGE EXCEEDS {alarm.threshold}% ***")
-                logging.warning(f"CPU_Alarm_Triggered_Threshold_{alarm.threshold}%_Current_{current_cpu}%")
+            current_value = 0
+            if alarm.alarm_type == "CPU":
+                current_value = current_cpu
+            elif alarm.alarm_type == "Memory":
+                current_value = current_mem_percent
+            elif alarm.alarm_type == "Disk":
+                current_value = current_disk_percent
+            
+            if current_value > alarm.threshold and not alarm.is_triggered:
+                print(f"\n*** WARNING, ALARM TRIGGERED: {alarm.alarm_type} USAGE EXCEEDS {alarm.threshold}% ***")
+                logging.warning(f"{alarm.alarm_type}_Alarm_Triggered_Threshold_{alarm.threshold}%_Current_{current_value}%")
+                send_email_alert(alarm, current_value)
+                alarm.is_triggered = True
 
-            elif alarm.alarm_type == "Memory" and current_mem_percent > alarm.threshold:
-                print(f"\n*** WARNING, ALARM TRIGGERED: MEMORY USAGE EXCEEDS {alarm.threshold}% ***")
-                logging.warning(f"Memory_Alarm_Triggered_Threshold_{alarm.threshold}%_Current_{current_mem_percent}%")
-                
-            elif alarm.alarm_type == "Disk" and current_disk_percent > alarm.threshold:
-                print(f"\n*** WARNING, ALARM TRIGGERED: DISK USAGE EXCEEDS {alarm.threshold}% ***")
-                logging.warning(f"Disk_Alarm_Triggered_Threshold_{alarm.threshold}%_Current_{current_disk_percent}%")
+            elif current_value <= alarm.threshold and alarm.is_triggered:
+                print(f"\n--- INFO: {alarm.alarm_type} usage back to normal. Alarm at {current_value}% is reset. ---")
+                logging.info(f"{alarm.alarm_type}_Alarm_Reset_Threshold_{alarm.threshold}%")
+                alarm.is_triggered = False
 
         print(f"Monitoring... Last check: CPU {current_cpu}%, Mem {current_mem_percent}%, Disk {current_disk_percent}%. Press any key to exit.", end="\r")
         
