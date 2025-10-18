@@ -1,6 +1,6 @@
-# ---------- Systemutveckling i Python ----------
+# ---------- Monitoring Application ----------
 # This is the main file for our monitoring application.
-# source venv/Scripts/activate - Activate virtual environment (Windows)
+
 
 from system_info import get_cpu_usage, get_memory_usage, get_disk_usage
 from alarm import Alarm
@@ -65,6 +65,8 @@ def monitoring_mode(alarms_list):
     logging.info("Monitoring_Mode_Started")
 
     while True:
+# --- Check for User Input to Exit ---
+# msvcrt.kbhit() checks if a key has been pressed WITHOUT stopping the program.
         if msvcrt.kbhit():
             print("\nKey pressed, exiting monitoring mode...")
             logging.info("Monitoring_Mode_Exited_by_user")
@@ -72,9 +74,11 @@ def monitoring_mode(alarms_list):
             break
 
         current_cpu = get_cpu_usage()
+# Use '_' to ignore unused return values (GB amounts)
         current_mem_percent, _, _ = get_memory_usage()
         current_disk_percent, _, _ = get_disk_usage()
 
+# --- Check Alarms ---
         for alarm in alarms_list:
             current_value = 0
             if alarm.alarm_type == "CPU":
@@ -83,21 +87,24 @@ def monitoring_mode(alarms_list):
                 current_value = current_mem_percent
             elif alarm.alarm_type == "Disk":
                 current_value = current_disk_percent
-            
+
+# --- Alarm Trigger Logic ---
             if current_value > alarm.threshold and not alarm.is_triggered:
                 print(f"\n*** WARNING, ALARM TRIGGERED: {alarm.alarm_type} USAGE EXCEEDS {alarm.threshold}% ***")
                 logging.warning(f"{alarm.alarm_type}_Alarm_Triggered_Threshold_{alarm.threshold}%_Current_{current_value}%")
                 send_email_alert(alarm, current_value)
                 alarm.is_triggered = True
 
+# --- Alarm Reset Logic ---
             elif current_value <= alarm.threshold and alarm.is_triggered:
                 print(f"\n--- INFO: {alarm.alarm_type} usage back to normal. Alarm at {current_value}% is reset. ---")
                 logging.info(f"{alarm.alarm_type}_Alarm_Reset_Threshold_{alarm.threshold}%")
                 alarm.is_triggered = False
 
+# --- Display Status and Pause ---
         print(f"Monitoring... Last check: CPU {current_cpu}%, Mem {current_mem_percent}%, Disk {current_disk_percent}%. Press any key to exit.", end="\r")
         
-        time.sleep(5)
+        time.sleep(5)   # Pause for 5 seconds before the next check.
 
 def view_alarms(alarms_list):
     """Displays all configured alarms, sorted by type."""
@@ -109,6 +116,7 @@ def view_alarms(alarms_list):
         print("No alarms have been configured yet.")
 
     else:
+# Sort using a lambda function as the key, targeting the alarm_type attribute for sorting.
         sorted_alarms = sorted(alarms_list, key=lambda alarm: alarm.alarm_type)
         for index, alarm in enumerate(sorted_alarms, start=1):
             print(f"{index}. {alarm.alarm_type} alarm {alarm.threshold}%")
@@ -118,27 +126,7 @@ def create_alarm_menu(alarms_list):
     """Handles the alarm creation process."""
     logging.info("User_selected_Create_Alarm")
 
-    while True:
-        if type_choice in alarm_type_map:
-            alarm_type = alarm_type_map[type_choice]
-            logging.info(f"User_is_configuring_{alarm_type}_alarm")
-            while True:
-                threshold_input = input(f"Set alarm threshold for {alarm_type} Usage (1-100): ")
-                if threshold_input.isdigit():
-                    threshold = int(threshold_input)
-                    if 1 <= threshold <= 100:
-                        new_alarm = Alarm(alarm_type=alarm_type, threshold=threshold)
-                        alarms_list.append(new_alarm)
-                        save_alarms(alarms_list)
-                        print(f"Success: Alarm for {alarm_type} Usage set to {threshold}%.")
-                        logging.info(f"{alarm_type}_Alarm_Created_Threshold_{threshold}%")
-                        return
-    return
-
-def create_alarm_menu(alarms_list):
-    """Handles the alarm creation process."""
-    logging.info("User_selected_Create_Alarm")
-
+# Main loop for the configuration sub-menu
     while True:
         print("\n--- Configure Alarm ---")
         print("1. CPU Usage")
@@ -176,6 +164,7 @@ def create_alarm_menu(alarms_list):
         else:
             print("Invalid choice. Please select 1-4.")
 
+# === Main Application Logic ===
 def main_menu():
     """Displays the main menu and handles user input."""
     monitoring_active = False
@@ -225,12 +214,13 @@ def main_menu():
         elif choice == '6':
             delete_alarm_menu(alarms)
         elif choice == '7':
+# --- Start the GUI ---
             logging.info("User_selected_Start_GUI")
             print("Starting Graphical Interface...")
             
-            root = tk.Tk()
-            app = App(root, alarms)
-            root.mainloop()
+            root = tk.Tk()  # Create the main tkinter window
+            app = App(root, alarms)  # Instantiate our GUI App class, passing the window and alarms
+            root.mainloop()  # Start the tkinter event loop (blocks until window is closed)
             print("Graphical interface closed.")
             logging.info("GUI_closed_returning_to_main_menu")
         
@@ -242,6 +232,6 @@ def main_menu():
             print("Invalid choice. Please try again.")
 
 if __name__ == "__main__":
-    setup_logging()
-    logging.info("Application_Started")
-    main_menu()
+    setup_logging()  # Configure logging first
+    logging.info("Application_Started")  # Log application start
+    main_menu()  # Run the main menu loop
