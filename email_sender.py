@@ -1,10 +1,15 @@
-# ---------- Systemutveckling i Python ----------
+# ---------- Monitoring Application ----------
 # This module handles sending email alerts using SendGrid.
 
 
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
+from sendgrid import SendGridAPIClient  # The main client to interact with the SendGrid API.
+from sendgrid.helpers.mail import Mail  # A helper class to construct email messages easily.
+
+# Import the 'config' module (config.py) to access sensitive information securely.
+# config.py contains SENDGRID_API_KEY, FROM_EMAIL, TO_EMAIL and is listed in .gitignore.
 import config
+
+# Import the logging module to record email sending events (success or failure).
 import logging
 
 def send_email_alert(alarm, current_value):
@@ -23,6 +28,10 @@ def send_email_alert(alarm, current_value):
         subject=subject,
         plain_text_content=content
     )
+
+# --- Send the email ---
+# Sending email can fail (network issues, invalid API key, etc.), so wrap in try...except.
+# This prevents the entire monitoring application from crashing if email sending fails.
     try:
         sg = SendGridAPIClient(config.SENDGRID_API_KEY)
         response = sg.send(message)
